@@ -79,30 +79,27 @@ const getEmptyButtonIndex = () => {
   return emptyIndexes;
 };
 
-// AI spielt nach einer Verzögerung
 const playAIWithDelay = () => {
-  setTimeout(() => {
     const emptyIndexes = getEmptyButtonIndex();
-
+  
     if (emptyIndexes.length > 0) {
       // Zufälligen leeren Button auswählen
       const randomIndex = emptyIndexes[Math.floor(Math.random() * emptyIndexes.length)];
       // AI-Zug (angenommen, AI spielt "O")
       btnRef[randomIndex].innerText = "O";
       btnRef[randomIndex].disabled = true;
-
+  
       // Zähler nach AI-Zug inkrementieren
       count += 1;
-
+  
       // Nach AI-Zug auf Gewinn prüfen
       winChecker();
-
+  
       if (count === 9) {
         drawFunction();
       }
     }
-  }, 1000); // 1000 Millisekunden = 1 Sekunde Verzögerung
-};
+  };
 
 // Gewinnprüfung
 const winChecker = () => {
