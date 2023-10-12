@@ -1,10 +1,12 @@
-let btnRef = document.querySelectorAll(".button-option");
-let popupRef = document.querySelector(".popup");
-let newgameBtn = document.getElementById("new-game");
-let restartBtn = document.getElementById("restart");
-let msgRef = document.getElementById("message");
-//Winning Pattern Array
-let winningPattern = [
+// HTML-Elemente
+const btnRef = document.querySelectorAll(".button-option");
+const popupRef = document.querySelector(".popup");
+const newgameBtn = document.getElementById("new-game");
+const restartBtn = document.getElementById("restart");
+const msgRef = document.getElementById("message");
+
+// Gewinnmuster-Array
+const winningPattern = [
   [0, 1, 2],
   [0, 3, 6],
   [2, 5, 8],
@@ -14,25 +16,29 @@ let winningPattern = [
   [0, 4, 8],
   [2, 4, 6],
 ];
-//Player 'X' plays first
+
+// Spieler 'X' beginnt
 let xTurn = true;
 let count = 0;
-//Disable All Buttons
+
+// Alle Buttons deaktivieren
 const disableButtons = () => {
   btnRef.forEach((element) => (element.disabled = true));
-  //enable popup
+  // Popup aktivieren
   popupRef.classList.remove("hide");
 };
-//Enable all buttons (For New Game and Restart)
+
+// Alle Buttons aktivieren (Neues Spiel und Neustart)
 const enableButtons = () => {
   btnRef.forEach((element) => {
     element.innerText = "";
     element.disabled = false;
   });
-  //disable popup
+  // Popup deaktivieren
   popupRef.classList.add("hide");
 };
-//This function is executed when a player wins
+
+// Funktion für den Gewinnfall
 const winFunction = (letter) => {
   disableButtons();
   if (letter == "X") {
@@ -41,61 +47,118 @@ const winFunction = (letter) => {
     msgRef.innerHTML = "&#x1F389; <br> 'O' Gewinnt";
   }
 };
-//Function for draw
+
+// Funktion für ein Unentschieden
 const drawFunction = () => {
   disableButtons();
   msgRef.innerHTML = "&#x1F60E; <br> Unentschieden";
 };
-//New Game
-newgameBtn.addEventListener("click", () => {
+
+// Neue Spiel-Funktion
+const newGame = () => {
   count = 0;
   enableButtons();
-});
-restartBtn.addEventListener("click", () => {
+  xTurn = true; // Spieler 'X' beginnt
+};
+
+// Neustart-Funktion
+const restartGame = () => {
   count = 0;
   enableButtons();
-});
-//Win Logic
+  xTurn = true; // Spieler 'X' beginnt
+};
+
+// Funktion, um einen verfügbaren leeren Button-Index zu erhalten
+const getEmptyButtonIndex = () => {
+  const emptyIndexes = [];
+  for (let i = 0; i < btnRef.length; i++) {
+    if (btnRef[i].innerText === "") {
+      emptyIndexes.push(i);
+    }
+  }
+  return emptyIndexes;
+};
+
+// AI spielt nach einer Verzögerung
+const playAIWithDelay = () => {
+  setTimeout(() => {
+    const emptyIndexes = getEmptyButtonIndex();
+
+    if (emptyIndexes.length > 0) {
+      // Zufälligen leeren Button auswählen
+      const randomIndex = emptyIndexes[Math.floor(Math.random() * emptyIndexes.length)];
+      // AI-Zug (angenommen, AI spielt "O")
+      btnRef[randomIndex].innerText = "O";
+      btnRef[randomIndex].disabled = true;
+
+      // Zähler nach AI-Zug inkrementieren
+      count += 1;
+
+      // Nach AI-Zug auf Gewinn prüfen
+      winChecker();
+
+      if (count === 9) {
+        drawFunction();
+      }
+    }
+  }, 1000); // 1000 Millisekunden = 1 Sekunde Verzögerung
+};
+
+// Gewinnprüfung
 const winChecker = () => {
-  //Loop through all win patterns
   for (let i of winningPattern) {
     let [element1, element2, element3] = [
       btnRef[i[0]].innerText,
       btnRef[i[1]].innerText,
       btnRef[i[2]].innerText,
     ];
-    //Check if elements are filled
-    //If 3 empty elements are same and would give win as would
-    if (element1 != "" && (element2 != "") & (element3 != "")) {
+
+    if (element1 != "" && element2 != "" && element3 != "") {
       if (element1 == element2 && element2 == element3) {
-        //If all 3 buttons have same values then pass the value to winFunction
         winFunction(element1);
       }
     }
   }
 };
-//Display X/O on click
+
+// Event-Listener für die Buttons
 btnRef.forEach((element) => {
   element.addEventListener("click", () => {
-    if (xTurn) {
-      xTurn = false;
-      //Display X
+    if (xTurn && element.innerText === "") {
+      // 'X' anzeigen
       element.innerText = "X";
       element.disabled = true;
-    } else {
-      xTurn = true;
-      //Display Y
-      element.innerText = "O";
-      element.disabled = true;
+
+      // Zähler nach Spielerzug inkrementieren
+      count += 1;
+
+      // Nach Spielerzug auf Gewinn prüfen
+      winChecker();
+
+      if (count === 9) {
+        drawFunction();
+      }
+
+      // AI spielt nach 1 Sekunde Verzögerung nach dem Spielerzug
+      playAIWithDelay();
     }
-    //Increment count on each click
-    count += 1;
-    if (count == 9) {
-      drawFunction();
-    }
-    //Check for win on every click
-    winChecker();
   });
 });
-//Enable Buttons and disable popup on page load
-window.onload = enableButtons;
+
+// Spiel initialisieren
+window.onload = () => {
+  // Spiel initialisieren
+  newGame();
+};
+
+// Event-Listener für Neues Spiel
+newgameBtn.addEventListener("click", () => {
+  // Neues Spiel starten
+  newGame();
+});
+
+// Event-Listener für Neustart
+restartBtn.addEventListener("click", () => {
+  // Spiel neustarten
+  restartGame();
+});
